@@ -1,0 +1,5 @@
+apiVersion: v2
+name: todo-ai-project
+description: A Helm chart for deploying the Todo AI Project
+version: 0.1.0
+appVersion: "1.0"

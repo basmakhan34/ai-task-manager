@@ -1,3 +1,10 @@
+---
+title: AI Todo App
+sdk: docker
+docker_compose_file: docker-compose.yml
+app_port: 3000
+---
+
 # AI-Native Todo App - Phase 1
 
 This is a spec-driven, AI-generated Python Console Todo Application.
@@ -13,3 +20,4 @@ This is a spec-driven, AI-generated Python Console Todo Application.
 2. Run the application using:
    ```bash
    python src/todo.py
+   ```
