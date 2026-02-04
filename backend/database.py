@@ -8,6 +8,6 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 def init_db():
     # Circular Import fix: Models ko function ke andar import karein
-    import backend.models
+    import models
     # Ye line naye columns ke saath tables banayegi
     SQLModel.metadata.create_all(engine)

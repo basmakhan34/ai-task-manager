@@ -1,0 +1,89 @@
+services:
+  # --- Database (Tasks ko mehfooz rakhne ke liye) ---
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=todos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    ports:
+      - "9092:9092"
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+
+  dapr-placement:
+    image: "daprio/placement:latest"
+    command: ["./placement", "-port", "50005"]
+    ports:
+      - "50005:50005"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    environment:
+      - GROQ_API_KEY=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
+      - DATABASE_URL=postgresql://user:password@db:5432/todos
+    depends_on:
+      - db
+      - redpanda
+    ports:
+      - "8000:8000"
+
+  backend-dapr:
+    image: "daprio/daprd:latest"
+    command: [
+      "./daprd",
+      "-app-id", "backend",
+      "-app-port", "8000",
+      "-placement-host-address", "dapr-placement:50005",
+      "-resources-path", "/components"
+    ]
+    volumes:
+      - ./components:/components
+    network_mode: "service:backend"
+    depends_on:
+      - backend
+
+  notification-service:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    command: python notification.py
+    environment:
+      - APP_PORT=8001
+    depends_on:
+      - redpanda
+    ports:
+      - "8001:8001"
+
+  notification-dapr:
+    image: "daprio/daprd:latest"
+    command: [
+      "./daprd",
+      "-app-id", "notification-service",
+      "-app-port", "8001",
+      "-placement-host-address", "dapr-placement:50005",
+      "-resources-path", "/components"
+    ]
+    volumes:
+      - ./components:/components
+    network_mode: "service:notification-service"
+    depends_on:
+      - notification-service
+
+# --- Volumes (Ye data ko delete hone se bachayega) ---
+volumes:
+  postgres_data:

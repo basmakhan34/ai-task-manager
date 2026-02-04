@@ -1,22 +1,12 @@
-# Dockerfile for Backend (FastAPI)
-
-# Stage 1: Base image
-FROM python:3.9-slim
-
-# Set working directory
+FROM python:3.11-slim
 WORKDIR /app
 
-# Copy requirements file
-COPY backend/requirements.txt .
+# Batayein ke file backend folder ke andar hai
+COPY backend/requirements.txt . 
 
-# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the backend code
+# Pura backend code copy karein
 COPY backend/ .
 
-# Expose the port the app runs on
-EXPOSE 8000
-
-# Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

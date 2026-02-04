@@ -1,37 +1,18 @@
-# Dockerfile for Frontend (Next.js)
+FROM node:20-slim
 
-# Stage 1: Build the application
-FROM node:20-slim AS builder
-
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY frontend/package.json frontend/package-lock.json ./
+# Dependency files copy karein
+COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm install
+# Dependencies install karein
+RUN npm install --legacy-peer-deps
 
-# Copy the rest of the frontend code
-COPY frontend/ ./
+# Baqi sara code copy karein
+COPY . .
 
-# Build the Next.js application
-RUN npm run build
-
-# Stage 2: Production image
-FROM node:20-slim AS runner
-
-# Set working directory
-WORKDIR /app
-
-# Copy built application from builder stage
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/public ./public
-
-# Expose the port the app runs on
+# Port 3000 expose karein
 EXPOSE 3000
 
-# Command to run the application
-CMD ["npm", "start"]
+# Build ke bajaye direct development mode mein chalayein
+CMD ["npm", "run", "dev"]

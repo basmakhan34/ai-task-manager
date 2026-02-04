@@ -4,15 +4,19 @@ import { CheckCircle2, Circle, Trash2 } from "lucide-react";
 
 export default function TodoList() {
   const [todos, setTodos] = useState<any[]>([]);
+  // ZAROORI: Apna lamba URL yahan aik hi baar set karein
+  const BASE_URL = "https://solid-eureka-4jq6j59p56753qj7p-8000.app.github.dev";
 
-  // 1. Tasks ko load karne ka function
   const fetchTasks = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/todos");
+      // Backend route /todos hai, /api/todos nahi
+      const res = await fetch(`${BASE_URL}/todos`);
       const data = await res.json();
-      setTodos(data);
+      // Safety Check: Sirf tab set karein agar data array ho
+      setTodos(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch error:", err);
+      setTodos([]); // Error par khali list set karein taake crash na ho
     }
   };
 
@@ -20,14 +24,12 @@ export default function TodoList() {
     fetchTasks();
   }, []);
 
-  // 2. Task ko delete karne ka function
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/todos/${id}`, {
+      const res = await fetch(`${BASE_URL}/todos/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        // UI se foran hata do
         setTodos(prev => prev.filter(t => t.id !== id));
       }
     } catch (err) {
@@ -35,18 +37,15 @@ export default function TodoList() {
     }
   };
 
-  // 3. Task ko complete/uncomplete karne ka function
   const handleToggle = async (id: number, currentStatus: boolean) => {
     try {
-      // Backend par update bhejein (Yaqeen karein aapka backend PUT support karta hai)
-      const res = await fetch(`http://127.0.0.1:8000/todos/${id}`, {
+      const res = await fetch(`${BASE_URL}/todos/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed: !currentStatus }),
       });
       
       if (res.ok) {
-        // UI ko update karein
         setTodos(prev => prev.map(t => 
           t.id === id ? { ...t, completed: !currentStatus } : t
         ));
@@ -56,7 +55,7 @@ export default function TodoList() {
     }
   };
 
-  if (todos.length === 0) {
+  if (!Array.isArray(todos) || todos.length === 0) {
     return <div className="text-gray-500 text-center mt-20">No tasks found.</div>;
   }
 

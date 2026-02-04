@@ -2,21 +2,20 @@ import os
 import json
 from groq import Groq
 from sqlmodel import Session, select
-from backend.database import engine
-from backend.models import Task, Message
+from database import engine
+from models import Task, Message
 from dotenv import load_dotenv
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def add_task_to_db(task_text: str):
-    """Adds a task using the correct 'task' column."""
     with Session(engine) as session:
         new_task = Task(task=task_text, completed=False, user_id=1)
         session.add(new_task)
         session.commit()
         session.refresh(new_task)
-        return f"Done! I've added '{task_text}' to your list. ✅"
+        return new_task, f"Done! I've added '{task_text}' to your list. ✅"
 
 def get_chat_history(conversation_id: int):
     with Session(engine) as session:
@@ -61,22 +60,25 @@ def ask_ai(user_input: str, conversation_id: int = 1):
 
     response_message = response.choices[0].message
     final_text = ""
-    task_created = False
+    task_created = None
 
+    # Tool Call logic fix
     if response_message.tool_calls:
         for tool_call in response_message.tool_calls:
             if tool_call.function.name == "add_task_to_db":
                 args = json.loads(tool_call.function.arguments)
                 task_text = args.get("task_text")
                 if task_text:
-                    # Tool chalao aur friendly text hasil karo
-                    final_text = add_task_to_db(task_text)
-                    task_created = True
+                    task_obj, confirmation = add_task_to_db(task_text)
+                    final_text = confirmation
+                    task_created = task_obj
+    elif response_message.content:
+        final_text = response_message.content
     else:
-        final_text = response_message.content if response_message.content else "How can I assist you?"
+        final_text = "I'm not sure how to help with that, but I can manage your tasks!"
 
+    # Save to history
     save_message(conversation_id, "user", user_input)
     save_message(conversation_id, "assistant", final_text)
-    
     
     return final_text, task_created

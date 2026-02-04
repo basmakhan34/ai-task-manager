@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-backend
+  template:
+    metadata:
+      labels:
+        app: ai-backend
+    spec:
+      containers:
+      - name: ai-backend
+        image: basmakhan34/ai-backend:v1
+        ports:
+        - containerPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-frontend
+  template:
+    metadata:
+      labels:
+        app: ai-frontend
+    spec:
+      containers:
+      - name: ai-frontend
+        image: basmakhan34/ai-frontend:v1
+        ports:
+        - containerPort: 3000

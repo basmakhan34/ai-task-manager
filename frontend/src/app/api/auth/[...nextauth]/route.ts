@@ -1,7 +1,8 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const handler = NextAuth({
+// Hum options ko alag variable mein rakhte hain
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -10,8 +11,7 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // This is where you would add your own authentication logic
-        // For this example, we'll accept any email and password
+        // Authentication logic
         if (credentials?.email && credentials?.password) {
           return { id: "1", name: "Test User", email: credentials.email };
         }
@@ -22,6 +22,10 @@ const handler = NextAuth({
   pages: {
     signIn: "/",
   },
-});
+  secret: process.env.NEXTAUTH_SECRET || "secret", // Secret add karna zaroori hai
+};
+
+// NextAuth ko handler ke taur par set karna
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
