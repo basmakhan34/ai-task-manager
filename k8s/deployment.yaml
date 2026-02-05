@@ -17,6 +17,9 @@ spec:
         image: basmakhan34/ai-backend:v1
         ports:
         - containerPort: 8000
+        env:
+        - name: GROQ_API_KEY
+          value: "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"
 ---
 apiVersion: apps/v1
 kind: Deployment
