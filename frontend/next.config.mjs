@@ -1,12 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
-  // Agar aapka repo name 'ai-task-manager' hai toh ye line zaroori hai
-  basePath: '/ai-task-manager',
-  assetPrefix: '/ai-task-manager',
+  // Humne 'output: export' aur 'basePath' hata diya hai kyunke Vercel ko inki zaroorat nahi
 };
 
 export default nextConfig;
