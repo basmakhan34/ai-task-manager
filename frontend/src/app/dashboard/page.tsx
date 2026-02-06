@@ -10,7 +10,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // 1. Browser Notification Permission
   useEffect(() => {
+    if ("Notification" in window) {
+      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
+    }
+
     // Auth check
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (isLoggedIn !== "true") {
@@ -20,9 +27,23 @@ export default function DashboardPage() {
     }
   }, [router]);
 
+  // 2. Function to show Desktop Notification
+  const showDesktopNotification = (message: string) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("AI Task Manager", {
+        body: message,
+        icon: "/favicon.ico", // Aap apna logo path de sakti hain
+      });
+    }
+  };
+
   // Ye function tab chale ga jab AI koi naya task banaye ga
   const handleTaskCreated = useCallback(() => {
     console.log("AI Task detected! Updating UI...");
+    
+    // Desktop par notification dikhayein
+    showDesktopNotification("🚀 Naya task list mein add kar diya gaya hai!");
+
     // RefreshKey change hone se TodoList component dobara 'fetch' kare ga
     setRefreshKey(prev => prev + 1);
   }, []);
