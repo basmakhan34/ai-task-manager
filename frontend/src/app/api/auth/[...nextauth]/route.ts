@@ -1,7 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-// Hum options ko alag variable mein rakhte hain
+// Ye line Vercel ko batayegi ke ye page static nahi hai (Build error fix)
+export const dynamic = 'force-dynamic';
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -11,9 +13,13 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Authentication logic
+        // Filhaal test user logic, baad mein aap database connect kar sakti hain
+        if (credentials?.email === "admin@test.com" && credentials?.password === "password123") {
+          return { id: "1", name: "Basma Khan", email: credentials.email };
+        }
+        // Demo ke liye hum har login allow kar dete hain
         if (credentials?.email && credentials?.password) {
-          return { id: "1", name: "Test User", email: credentials.email };
+           return { id: "1", name: "User", email: credentials.email };
         }
         return null;
       },
@@ -22,10 +28,9 @@ export const authOptions = {
   pages: {
     signIn: "/",
   },
-  secret: process.env.NEXTAUTH_SECRET || "secret", // Secret add karna zaroori hai
+  secret: process.env.NEXTAUTH_SECRET || "secret_key_123",
 };
 
-// NextAuth ko handler ke taur par set karna
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
