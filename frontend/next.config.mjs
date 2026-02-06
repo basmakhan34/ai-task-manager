@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
+  output: 'export',
+  images: {
+    unoptimized: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Agar aapka repo name 'ai-task-manager' hai toh ye line zaroori hai
+  basePath: '/ai-task-manager',
+  assetPrefix: '/ai-task-manager',
 };
 
-// module.exports ki jagah "export default" use karein
 export default nextConfig;
