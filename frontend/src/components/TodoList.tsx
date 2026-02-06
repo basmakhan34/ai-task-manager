@@ -4,19 +4,23 @@ import { CheckCircle2, Circle, Trash2 } from "lucide-react";
 
 export default function TodoList() {
   const [todos, setTodos] = useState<any[]>([]);
-  // ZAROORI: Apna lamba URL yahan aik hi baar set karein
-  const BASE_URL = "https://solid-eureka-4jq6j59p56753qj7p-8000.app.github.dev";
+
+  // FIXED: Ab ye URL Vercel ki environment variables se uthaye ga
+  // Agar variable nahi mila, toh ye Hugging Face ka direct link use kare ga
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://basmakhan34-ai-expert-backend.hf.space";
 
   const fetchTasks = async () => {
     try {
-      // Backend route /todos hai, /api/todos nahi
+      console.log("Fetching tasks from:", BASE_URL);
       const res = await fetch(`${BASE_URL}/todos`);
+      
+      if (!res.ok) throw new Error("Network response was not ok");
+      
       const data = await res.json();
-      // Safety Check: Sirf tab set karein agar data array ho
       setTodos(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch error:", err);
-      setTodos([]); // Error par khali list set karein taake crash na ho
+      setTodos([]); 
     }
   };
 
@@ -56,7 +60,12 @@ export default function TodoList() {
   };
 
   if (!Array.isArray(todos) || todos.length === 0) {
-    return <div className="text-gray-500 text-center mt-20">No tasks found.</div>;
+    return (
+      <div className="flex flex-col items-center justify-center mt-20 space-y-2">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-gray-500 text-sm font-mono">CONNECTING TO DATABASE...</p>
+      </div>
+    );
   }
 
   return (
